@@ -68,6 +68,9 @@ Parameters:
 example usage: sudo python warberry.py -A
                sudo python warberry.py --attack
                sudo python warberry.py -C
+               sudo python warberry.py -A interface
+
+default interface = eth0
 
 [*] Parameter selection is mandatory
 

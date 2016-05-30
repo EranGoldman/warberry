@@ -47,10 +47,13 @@ import ftplib
 import time
 from netaddr import *
 #External modules
-from banners import *
-from network_scanners import *
-from services_enum import *
-from rest_bypass import *
+from resources import *
+#from banners import *
+#from network_scanners import *
+#from services_enum import *
+#from rest_bypass import *
+
+networlInterface = "eth0"
 
 class bcolors:
 
@@ -65,6 +68,7 @@ class bcolors:
 
 
 def main(argv):
+	global networlInterface
         if argv == '-h' or argv == '--help':
             subprocess.call('clear', shell = True)
             banner_full()
@@ -77,11 +81,11 @@ def main(argv):
             if not os.geteuid() == 0:
                 print bcolors.FAIL + '*** You are not running as root and some modules may fail ***. Run again with sudo. \n' + bcolors.ENDC
             dhcp_check()
-            int_ip = iprecon('eth0')
+            int_ip = iprecon(networlInterface)
             if (int_ip==None):
                 exit
             else:
-                netmask = netmask_recon('eth0')
+                netmask = netmask_recon(networlInterface)
                 external_IP_recon()
                 with open('../Results/running_status', 'a') as status:
                     status.write("Completed IP Recon\n")
@@ -141,8 +145,8 @@ def main(argv):
         elif argv == '-T' or argv == '--toptcp':
             subprocess.call('clear', shell = True)
             banner()
-            int_ip = internal_IP_recon('eth0')
-            netmask = netmask_recon('eth0')
+            int_ip = internal_IP_recon(networlInterface)
+            netmask = netmask_recon(networlInterface)
             print external_IP_recon()
             CIDR = subnet(int_ip, netmask)
             scanner_top(CIDR)
@@ -150,8 +154,8 @@ def main(argv):
         elif argv == '-B' or argv == '--tcpudp':
             subprocess.call('clear', shell = True)
             banner()
-            int_ip = internal_IP_recon('eth0')
-            netmask = netmask_recon('eth0')
+            int_ip = internal_IP_recon(networlInterface)
+            netmask = netmask_recon(networlInterface)
             print external_IP_recon()
             CIDR = subnet(int_ip, netmask)
             scanner_full(CIDR)
@@ -159,8 +163,8 @@ def main(argv):
         elif argv == '-F' or argv == '--fulltcp':
             subprocess.call('clear', shell = True)
             banner()
-            int_ip = internal_IP_recon('eth0')
-            netmask = netmask_recon('eth0')
+            int_ip = internal_IP_recon(networlInterface)
+            netmask = netmask_recon(networlInterface)
             print external_IP_recon()
             CIDR = subnet(int_ip, netmask)
             scanner_tcp_full(CIDR)
@@ -286,13 +290,13 @@ def clear_output():
 
 
 def sniffer():
-
+	global networlInterface
         print " "
         packet_count = 20
         pcap_location = "../Results/capture.pcap"
         print bcolors.OKGREEN + "      [ NETWORK SNIFFING MODULE ]\n" + bcolors.ENDC
         print "Sniffer will begin capturing %d packets" %packet_count #Change the count number accordingly
-        packets = sniff(iface="eth0", count= packet_count)
+        packets = sniff(iface=networlInterface, count= packet_count)
         wrpcap(pcap_location, packets)
         print bcolors.OKGREEN + "[+] Capture Completed." + bcolors.ENDC + " PCAP File Saved at " + bcolors.OKGREEN + "%s!\n" %pcap_location + bcolors.ENDC
 
@@ -335,10 +339,13 @@ def nbtscan(CIDR):
 
 
 if __name__ == '__main__':
-
-        #try:
-    main(sys.argv[1])
-        #except:
-        #        subprocess.call('clear', shell = True)
-         #       banner_full()
-                
+	global networlInterface
+        if len(sys.argv) == 3:
+		networlInterface = sys.argv[2]
+                main(sys.argv[1])
+        else:
+                try:
+                        main(sys.argv[1])
+                except:
+                        subprocess.call('clear', shell = True)
+                        banner_full()
